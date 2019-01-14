@@ -45,7 +45,7 @@ public class ActionProceess extends HttpServlet {
         String error = "";
         HttpSession session = request.getSession();
         String url = getServletContext().getRealPath("/");
-        
+
         if (action.equals("getdata")) {
             System.out.println("===== getdata =====");
             Dao dao = new Dao();
@@ -60,8 +60,9 @@ public class ActionProceess extends HttpServlet {
                 error = ex.getMessage();
             } catch (TransformerException ex) {
                 error = ex.getMessage();
+            } catch (NumberFormatException ex) {
+                error = ex.getMessage();
             }
-            
         } else if (action.equals("showdata")) {
             System.out.println("===== showdata =====");
             if (session.getAttribute("wrote") != null) {
@@ -72,47 +73,51 @@ public class ActionProceess extends HttpServlet {
                     getServletContext().getRequestDispatcher("/product.jsp").forward(request, response);
                 } catch (ParsingException ex) {
                     ex.getMessage();
+                } catch (NumberFormatException ex) {
+                    error = ex.getMessage();
                 }
             } else {
                 request.setAttribute("info", "you should \"get data\" first !");
                 getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
             }
-            
+
         } else if (action.equals("filtedata")) {
             System.out.println("===== filtedata =====");
             if (session.getAttribute("wrote") != null) {
                 String filter = request.getParameter("filter");
-                
+
                 try {
                     int IntFilter = Integer.parseInt(filter);
-                    
+                    System.out.println( "size :" + IntFilter);
+
                 } catch (NumberFormatException numberFormatException) {
                     request.setAttribute("info", "you should enter numberic forat for value to find data!");
                     getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
                 }
+
+                System.out.println("next");
                 ProcessingXML xulyXML = new ProcessingXML();
                 try {
                     ArrayList al = xulyXML.filtedContent(url, filter);
-                    request.setAttribute("/product.jsp", al);
+                    System.out.println( "size" + al.size());
+                    
+                    request.setAttribute("products", al);
                     getServletContext().getRequestDispatcher("/product.jsp").forward(request, response);
                 } catch (ValidityException ex) {
-                    ex.getMessage();
+                    System.out.println(ex.getMessage());
                 } catch (ParsingException ex) {
-                    ex.getMessage();
+                    System.out.println(ex.getMessage());
                 }
-            }
-            else {
+            } else {
                 request.setAttribute("info", "you should \"get data\" first !");
                 getServletContext().getRequestDispatcher("/index.jsp").forward(request, response);
             }
         }
-        if(!"".equals(error)){
+        if (!"".equals(error)) {
             request.setAttribute("error", error);
             getServletContext().getRequestDispatcher("/error.jsp").forward(request, response);
         }
-        
-        
-        
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
